@@ -1,7 +1,11 @@
-const CACHE_NAME = 'math-visualizer-v1';
+const CACHE_NAME = 'math-visualizer-v2';
+const BASE_PATH = '/math-visualizer/';
 const urlsToCache = [
-  './math-visualizer.html',
-  './manifest.json'
+  BASE_PATH,
+  BASE_PATH + 'index.html',
+  BASE_PATH + 'manifest.json',
+  BASE_PATH + 'icon-192.png',
+  BASE_PATH + 'icon-512.png'
 ];
 
 // Install event - cache files
@@ -11,6 +15,9 @@ self.addEventListener('install', event => {
       .then(cache => {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
+      })
+      .catch(err => {
+        console.error('Failed to cache:', err);
       })
   );
   self.skipWaiting();
