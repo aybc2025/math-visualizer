@@ -880,7 +880,9 @@
         // Register service worker for PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
+                navigator.serviceWorker.register('/math-visualizer/service-worker.js', {
+                    scope: '/math-visualizer/'
+                })
                     .then(registration => {
                         console.log('Service Worker registered:', registration);
                     })
