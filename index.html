@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מחשבון ויזואלי</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="מחשבון ויזואלי לילדים - לימוד חיבור, חיסור, כפל וחילוק">
+    <meta name="theme-color" content="#2d3436">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="מחשבון">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            padding: 20px;
+            color: #2d3436;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 300;
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: #636e72;
+        }
+
+        /* Controls Section */
+        .controls {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        /* Operation Buttons */
+        .operations {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .op-btn {
+            width: 56px;
+            height: 56px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #636e72;
+        }
+
+        .op-btn:hover {
+            border-color: #b0b0b0;
+        }
+
+        .op-btn.active {
+            border-color: #2d3436;
+            background: #2d3436;
+            color: white;
+        }
+
+        /* Sliders */
+        .slider-group {
+            margin-bottom: 20px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .slider-label span {
+            font-size: 0.9rem;
+            color: #636e72;
+        }
+
+        .slider-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+            min-width: 30px;
+            text-align: left;
+        }
+
+        .value-a { color: #4a90a4; }
+        .value-b { color: #7cb342; }
+
+        /* Number input */
+        .number-input {
+            width: 60px;
+            padding: 4px 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .number-input:focus {
+            border-color: #2d3436;
+        }
+
+        .number-input.input-a {
+            color: #4a90a4;
+        }
+
+        .number-input.input-b {
+            color: #7cb342;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #2d3436;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #2d3436;
+            cursor: pointer;
+            border: 3px solid white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        /* Result Display */
+        .result {
+            text-align: center;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 1.4rem;
+            direction: ltr;
+        }
+
+        .result-equation {
+            color: #636e72;
+        }
+
+        .result-answer {
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        /* Grid Section */
+        .grid-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 3px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .cell {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 3px;
+            background: #f0f0f0;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: 1px solid #e8e8e8;
+        }
+
+        .cell:hover {
+            transform: scale(1.05);
+        }
+
+        .cell.color-a {
+            background: #4a90a4;
+            border-color: #3d7a8c;
+        }
+
+        .cell.color-b {
+            background: #7cb342;
+            border-color: #689f38;
+        }
+
+        .cell.color-result {
+            background: #78909c;
+            border-color: #607d8b;
+        }
+
+        .cell.color-removed {
+            background: #f0f0f0;
+            border-color: #e0e0e0;
+            position: relative;
+        }
+
+        .cell.color-removed::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 2px;
+            background: #e57373;
+            transform: rotate(-45deg);
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-top: 16px;
+            font-size: 0.85rem;
+            color: #636e72;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        .legend-color.a { background: #4a90a4; }
+        .legend-color.b { background: #7cb342; }
+
+        /* Instructions */
+        .instructions {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.85rem;
+            color: #9e9e9e;
+        }
+
+        /* Division groups - arranged in rows */
+        .cell.group-0 { background: #4a90a4; border-color: #3d7a8c; }
+        .cell.group-1 { background: #7cb342; border-color: #689f38; }
+        .cell.group-2 { background: #78909c; border-color: #607d8b; }
+        .cell.group-3 { background: #a1887f; border-color: #8d6e63; }
+        .cell.group-4 { background: #9575cd; border-color: #7e57c2; }
+        .cell.group-5 { background: #4db6ac; border-color: #26a69a; }
+        .cell.group-6 { background: #ffb74d; border-color: #ffa726; }
+        .cell.group-7 { background: #f06292; border-color: #ec407a; }
+        .cell.group-8 { background: #aed581; border-color: #9ccc65; }
+        .cell.group-9 { background: #4dd0e1; border-color: #26c6da; }
+
+        /* Remainder - distinct dark color */
+        .cell.remainder {
+            background: #37474f;
+            border-color: #263238;
+        }
+
+        /* Subtraction frame - outline around all original number */
+        .cell.sub-frame-top {
+            border-top: 3px solid #2d3436;
+        }
+        
+        .cell.sub-frame-bottom {
+            border-bottom: 3px solid #2d3436;
+        }
+        
+        .cell.sub-frame-left {
+            border-right: 3px solid #2d3436;
+        }
+        
+        .cell.sub-frame-right {
+            border-left: 3px solid #2d3436;
+        }
+
+        /* Division result=1: outline around all groups */
+        .cell.div-top {
+            border-top: 3px solid #2d3436;
+        }
+        
+        .cell.div-bottom {
+            border-bottom: 3px solid #2d3436;
+        }
+        
+        .cell.div-left {
+            border-right: 3px solid #2d3436;
+        }
+        
+        .cell.div-right {
+            border-left: 3px solid #2d3436;
+        }
+
+        /* Fraction display */
+        .fraction {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 4px;
+        }
+
+        .fraction-numerator {
+            border-bottom: 2px solid #2d3436;
+            padding-bottom: 2px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .fraction-denominator {
+            padding-top: 2px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        /* Multiplication grid lines */
+        .cell.mult-row-end {
+            border-left: 3px solid #2d3436;
+        }
+
+        .cell.mult-col-end {
+            border-bottom: 3px solid #2d3436;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>מחשבון ויזואלי</h1>
+        
+        <div class="controls">
+            <div class="operations">
+                <button class="op-btn active" data-op="add">+</button>
+                <button class="op-btn" data-op="subtract">−</button>
+                <button class="op-btn" data-op="multiply">×</button>
+                <button class="op-btn" data-op="divide">÷</button>
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span>מספר ראשון</span>
+                    <input type="number" class="number-input input-a" id="inputA" value="5" min="0" max="100">
+                </div>
+                <input type="range" id="sliderA" min="0" max="100" value="5">
+            </div>
+
+            <div class="slider-group">
+                <div class="slider-label">
+                    <span>מספר שני</span>
+                    <input type="number" class="number-input input-b" id="inputB" value="3" min="0" max="100">
+                </div>
+                <input type="range" id="sliderB" min="0" max="100" value="3">
+            </div>
+
+            <div class="result">
+                <span class="result-equation" id="equation">5 + 3</span>
+                <span class="result-answer"> = <span id="answer">8</span></span>
+            </div>
+        </div>
+
+        <div class="grid-container">
+            <div class="grid" id="grid"></div>
+            <div class="legend" id="legend">
+                <div class="legend-item">
+                    <div class="legend-color a"></div>
+                    <span>מספר ראשון</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color b"></div>
+                    <span>מספר שני</span>
+                </div>
+            </div>
+            <div class="instructions">
+                לחץ על הריבועים או גרור את הסליידרים
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let operation = 'add';
+        let valueA = 5;
+        let valueB = 3;
+        let isSelectingA = true;
+
+        // DOM Elements
+        const sliderA = document.getElementById('sliderA');
+        const sliderB = document.getElementById('sliderB');
+        const inputA = document.getElementById('inputA');
+        const inputB = document.getElementById('inputB');
+        const equation = document.getElementById('equation');
+        const answer = document.getElementById('answer');
+        const grid = document.getElementById('grid');
+        const legend = document.getElementById('legend');
+        const opButtons = document.querySelectorAll('.op-btn');
+
+        // Calculate total cells needed
+        function getTotalCells() {
+            switch (operation) {
+                case 'add':
+                    return valueA + valueB;
+                case 'subtract':
+                    return valueA;
+                case 'multiply':
+                    return valueA * valueB;
+                case 'divide':
+                    return valueA;
+                default:
+                    return 100;
+            }
+        }
+
+        // Initialize grid with dynamic size
+        function createGrid() {
+            const totalCells = Math.max(getTotalCells(), 1);
+            const cols = 10;
+            const rows = Math.ceil(totalCells / 10);
+            const cellCount = rows * 10;
+            
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            
+            for (let i = 0; i < cellCount; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.index = i;
+                cell.addEventListener('click', () => handleCellClick(i));
+                grid.appendChild(cell);
+            }
+        }
+
+        // Handle cell clicks
+        function handleCellClick(index) {
+            if (isSelectingA) {
+                valueA = index + 1;
+                sliderA.value = valueA;
+            } else {
+                valueB = index + 1;
+                sliderB.value = valueB;
+            }
+            updateDisplay();
+        }
+
+        // Update slider limits based on operation
+        function updateSliderLimits() {
+            switch (operation) {
+                case 'add':
+                    sliderA.max = 100;
+                    sliderB.max = 100;
+                    inputA.max = 100;
+                    inputB.max = 100;
+                    sliderB.min = 0;
+                    inputB.min = 0;
+                    // Adjust if sum would exceed 100
+                    if (valueA + valueB > 100) {
+                        valueB = Math.max(0, 100 - valueA);
+                        sliderB.value = valueB;
+                        inputB.value = valueB;
+                    }
+                    break;
+                case 'subtract':
+                    sliderA.max = 100;
+                    sliderB.max = 100;
+                    inputA.max = 100;
+                    inputB.max = 100;
+                    sliderB.min = 0;
+                    inputB.min = 0;
+                    // Limit B to not exceed A
+                    if (valueB > valueA) {
+                        valueB = valueA;
+                        sliderB.value = valueB;
+                        inputB.value = valueB;
+                    }
+                    break;
+                case 'multiply':
+                    sliderA.max = 10;
+                    sliderB.max = 10;
+                    inputA.max = 10;
+                    inputB.max = 10;
+                    sliderB.min = 0;
+                    inputB.min = 0;
+                    // Limit so that A * B <= 100
+                    if (valueA > 10) {
+                        valueA = 10;
+                        sliderA.value = valueA;
+                        inputA.value = valueA;
+                    }
+                    if (valueB > 10) {
+                        valueB = 10;
+                        sliderB.value = valueB;
+                        inputB.value = valueB;
+                    }
+                    // Adjust B if product exceeds 100
+                    if (valueA > 0 && valueA * valueB > 100) {
+                        valueB = Math.floor(100 / valueA);
+                        sliderB.value = valueB;
+                        inputB.value = valueB;
+                    }
+                    // Update B's max based on A
+                    const maxB = valueA > 0 ? Math.floor(100 / valueA) : 10;
+                    sliderB.max = Math.min(10, maxB);
+                    inputB.max = Math.min(10, maxB);
+                    break;
+                case 'divide':
+                    sliderA.max = 100;
+                    sliderB.max = 10;
+                    inputA.max = 100;
+                    inputB.max = 10;
+                    sliderB.min = 1;
+                    inputB.min = 1;
+                    if (valueA > 100) {
+                        valueA = 100;
+                        sliderA.value = valueA;
+                        inputA.value = valueA;
+                    }
+                    if (valueB < 1) {
+                        valueB = 1;
+                        sliderB.value = valueB;
+                        inputB.value = valueB;
+                    }
+                    if (valueB > 10) {
+                        valueB = 10;
+                        sliderB.value = valueB;
+                        inputB.value = valueB;
+                    }
+                    break;
+            }
+        }
+
+        // Calculate result
+        function calculate() {
+            switch (operation) {
+                case 'add':
+                    return valueA + valueB;
+                case 'subtract':
+                    return valueA - valueB;
+                case 'multiply':
+                    return valueA * valueB;
+                case 'divide':
+                    return valueB === 0 ? 0 : Math.floor(valueA / valueB);
+            }
+        }
+
+        // Get operation symbol
+        function getOpSymbol() {
+            const symbols = { add: '+', subtract: '−', multiply: '×', divide: '÷' };
+            return symbols[operation];
+        }
+
+        // Update legend based on operation
+        function updateLegend() {
+            legend.innerHTML = '';
+            
+            if (operation === 'divide' && valueB > 0) {
+                // Show all groups
+                const quotient = Math.floor(valueA / valueB);
+                const remainder = valueA % valueB;
+                const numGroups = Math.min(valueB, 10);
+                
+                for (let i = 0; i < numGroups; i++) {
+                    const item = document.createElement('div');
+                    item.className = 'legend-item';
+                    
+                    const colorBox = document.createElement('div');
+                    colorBox.className = 'legend-color';
+                    colorBox.style.background = getComputedStyle(document.documentElement).getPropertyValue('--group-' + i) || 
+                                                window.getComputedStyle(document.querySelector(`.cell.group-${i}`) || document.createElement('div')).backgroundColor;
+                    
+                    // Get actual color from CSS
+                    const tempCell = document.createElement('div');
+                    tempCell.className = `cell group-${i}`;
+                    tempCell.style.display = 'none';
+                    document.body.appendChild(tempCell);
+                    colorBox.style.background = window.getComputedStyle(tempCell).backgroundColor;
+                    document.body.removeChild(tempCell);
+                    
+                    const text = document.createElement('span');
+                    text.textContent = `קבוצה ${i + 1}`;
+                    
+                    item.appendChild(colorBox);
+                    item.appendChild(text);
+                    legend.appendChild(item);
+                }
+                
+                // Add remainder if exists
+                if (remainder > 0) {
+                    const item = document.createElement('div');
+                    item.className = 'legend-item';
+                    
+                    const colorBox = document.createElement('div');
+                    colorBox.className = 'legend-color';
+                    colorBox.style.background = '#37474f';
+                    
+                    const text = document.createElement('span');
+                    text.textContent = 'שארית';
+                    
+                    item.appendChild(colorBox);
+                    item.appendChild(text);
+                    legend.appendChild(item);
+                }
+            } else {
+                // Default legend for other operations
+                const items = [
+                    { color: '#4a90a4', label: 'מספר ראשון' },
+                    { color: '#7cb342', label: 'מספר שני' }
+                ];
+                
+                items.forEach(itemData => {
+                    const item = document.createElement('div');
+                    item.className = 'legend-item';
+                    
+                    const colorBox = document.createElement('div');
+                    colorBox.className = 'legend-color';
+                    colorBox.style.background = itemData.color;
+                    
+                    const text = document.createElement('span');
+                    text.textContent = itemData.label;
+                    
+                    item.appendChild(colorBox);
+                    item.appendChild(text);
+                    legend.appendChild(item);
+                });
+            }
+        }
+
+        // Update grid visualization
+        function updateGrid() {
+            createGrid();
+            const cells = grid.querySelectorAll('.cell');
+            const totalCells = cells.length;
+
+            switch (operation) {
+                case 'add':
+                    // Color first number
+                    for (let i = 0; i < valueA && i < totalCells; i++) {
+                        cells[i].classList.add('color-a');
+                    }
+                    // Color second number
+                    for (let i = valueA; i < valueA + valueB && i < totalCells; i++) {
+                        cells[i].classList.add('color-b');
+                    }
+                    break;
+
+                case 'subtract':
+                    // Color all of first number
+                    for (let i = 0; i < valueA && i < totalCells; i++) {
+                        cells[i].classList.add('color-a');
+                        
+                        // Add frame around all original cells
+                        const row = Math.floor(i / 10);
+                        const col = i % 10;
+                        const lastRow = Math.floor((valueA - 1) / 10);
+                        const lastCol = (valueA - 1) % 10;
+                        
+                        // Top edge
+                        if (row === 0) {
+                            cells[i].classList.add('sub-frame-top');
+                        }
+                        // Bottom edge
+                        if (row === lastRow) {
+                            cells[i].classList.add('sub-frame-bottom');
+                        }
+                        // Left edge (rightmost in RTL)
+                        if (col === 0 || (row > 0 && i === row * 10)) {
+                            cells[i].classList.add('sub-frame-left');
+                        }
+                        // Right edge (leftmost in RTL)
+                        if (col === 9 || i === valueA - 1) {
+                            cells[i].classList.add('sub-frame-right');
+                        }
+                    }
+                    // Mark removed cells
+                    for (let i = valueA - valueB; i < valueA && i < totalCells; i++) {
+                        cells[i].classList.remove('color-a');
+                        cells[i].classList.add('color-removed');
+                    }
+                    break;
+
+                case 'multiply':
+                    // Create a rectangle of valueA rows × valueB columns
+                    const rows = valueA;
+                    const cols = valueB;
+                    
+                    for (let r = 0; r < rows; r++) {
+                        for (let c = 0; c < cols; c++) {
+                            const index = r * 10 + c;
+                            if (index < totalCells) {
+                                cells[index].classList.add('color-a');
+                                // Add visual separators
+                                if (c === cols - 1 && cols < 10) {
+                                    cells[index].classList.add('mult-row-end');
+                                }
+                                if (r === rows - 1) {
+                                    cells[index].classList.add('mult-col-end');
+                                }
+                            }
+                        }
+                    }
+                    break;
+
+                case 'divide':
+                    if (valueB === 0) break;
+                    const quotient = Math.floor(valueA / valueB);
+                    const remainder = valueA % valueB;
+                    
+                    if (quotient > 0) {
+                        // Show all valueA cells, colored by which group they belong to
+                        for (let i = 0; i < valueA; i++) {
+                            const group = Math.floor(i / quotient);
+                            if (i < totalCells) {
+                                cells[i].classList.add(`group-${group % 10}`);
+                                
+                                // Add outline when result is 1
+                                if (quotient === 1) {
+                                    const posInGroup = i % quotient;
+                                    if (group === 0 && posInGroup === 0) {
+                                        cells[i].classList.add('div-top');
+                                    }
+                                    if (group === valueB - 1 && posInGroup === 0) {
+                                        cells[i].classList.add('div-bottom');
+                                    }
+                                    if (posInGroup === 0) {
+                                        cells[i].classList.add('div-left');
+                                    }
+                                    if (posInGroup === quotient - 1 || i === valueA - 1) {
+                                        cells[i].classList.add('div-right');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Remainder cells (if any) - shown after the complete groups
+                    // These are already part of valueA, shown in gray/different color
+                    // Actually, the remainder is already included in the loop above
+                    // We need to mark the remainder cells differently
+                    if (remainder > 0) {
+                        const completeGroupsSize = quotient * valueB;
+                        for (let i = completeGroupsSize; i < valueA && i < totalCells; i++) {
+                            cells[i].classList.remove(`group-${Math.floor(i / quotient) % 10}`);
+                            cells[i].classList.add('remainder');
+                        }
+                    }
+                    break;
+            }
+        }
+
+        // Update all displays
+        function updateDisplay() {
+            inputA.value = valueA;
+            inputB.value = valueB;
+            sliderA.value = valueA;
+            sliderB.value = valueB;
+            
+            const result = calculate();
+            equation.textContent = `${valueA} ${getOpSymbol()} ${valueB}`;
+            
+            if (operation === 'divide' && valueB > 0) {
+                const remainder = valueA % valueB;
+                if (remainder > 0) {
+                    if (result === 0) {
+                        // Pure fraction (can't divide)
+                        answer.innerHTML = `<span class="fraction"><span class="fraction-numerator">${valueA}</span><span class="fraction-denominator">${valueB}</span></span>`;
+                    } else {
+                        // Show result with remainder
+                        answer.textContent = `${result} ושארית ${remainder}`;
+                    }
+                } else {
+                    answer.textContent = result;
+                }
+            } else {
+                answer.textContent = result;
+            }
+            
+            updateGrid();
+            updateLegend();
+        }
+
+        // Event Listeners
+        sliderA.addEventListener('input', (e) => {
+            valueA = parseInt(e.target.value);
+            updateSliderLimits();
+            updateDisplay();
+        });
+
+        sliderB.addEventListener('input', (e) => {
+            valueB = parseInt(e.target.value);
+            updateDisplay();
+        });
+
+        inputA.addEventListener('input', (e) => {
+            let val = parseInt(e.target.value) || 0;
+            const max = (operation === 'multiply') ? 10 : 100;
+            val = Math.max(0, Math.min(max, val));
+            valueA = val;
+            updateSliderLimits();
+            updateDisplay();
+        });
+
+        inputB.addEventListener('input', (e) => {
+            let val = parseInt(e.target.value) || 0;
+            const min = operation === 'divide' ? 1 : 0;
+            const max = (operation === 'multiply' || operation === 'divide') ? 10 : 100;
+            val = Math.max(min, Math.min(max, val));
+            valueB = val;
+            updateSliderLimits();
+            updateDisplay();
+        });
+
+        opButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                opButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                operation = btn.dataset.op;
+                
+                // Reset slider min for division
+                if (operation !== 'divide') {
+                    sliderB.min = 0;
+                }
+                
+                updateSliderLimits();
+                updateDisplay();
+            });
+        });
+
+        // Toggle which number is being selected by clicking on grid
+        grid.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            isSelectingA = !isSelectingA;
+        });
+
+        // Double click to toggle selection mode
+        grid.addEventListener('dblclick', () => {
+            isSelectingA = !isSelectingA;
+        });
+
+        // Initialize
+        createGrid();
+        updateSliderLimits();
+        updateDisplay();
+
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

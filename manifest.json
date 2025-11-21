@@ -1,0 +1,26 @@
+{
+  "name": "מחשבון ויזואלי",
+  "short_name": "מחשבון",
+  "description": "מחשבון ויזואלי לילדים - לימוד חיבור, חיסור, כפל וחילוק",
+  "start_url": "./math-visualizer.html",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#2d3436",
+  "orientation": "portrait",
+  "lang": "he",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
